@@ -18,10 +18,10 @@
 <span style="font-size:16px;">  
 Experience **IndexTTS**: Please contact <u>xuanwu@bilibili.com</u> for more detailed information. </span>
 ### Contact
-QQ群：553460296 \
-Discord：https://discord.gg/uT32E7KDmy  \
-简历：indexspeech@bilibili.com  \
-欢迎大家来交流讨论！
+QQ Group: 553460296 \
+Discord: https://discord.gg/uT32E7KDmy  \
+Resume Submissions: indexspeech@bilibili.com  \
+Welcome everyone to communicate and discuss!
 ## 📣 Updates
 
 - `2025/03/25` 🔥🔥 We release the model parameters and inference code.
@@ -130,7 +130,7 @@ huggingface-cli download IndexTeam/Index-TTS \
   --local-dir checkpoints
 ```
 
-Recommended for China users. 如果下载速度慢，可以使用镜像：
+Recommended for users in China. If the download speed is slow, you can use a mirror:
 ```bash
 export HF_ENDPOINT="https://hf-mirror.com"
 ```
