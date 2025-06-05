@@ -255,56 +255,99 @@ with gr.Blocks(title="IndexTTS Demo") as demo:
                      outputs=[output_audio])
 
 
-def setup_cloudflare_tunnel():
+def setup_cloudflare_tunnel(port=7860):
     """Setup Cloudflare tunnel for public URL access"""
     try:
         import subprocess
         import threading
         import time
+        import os
 
         print("🌐 Setting up Cloudflare tunnel for public access...")
 
         # Install cloudflared if not available
         try:
-            subprocess.run(['cloudflared', '--version'], capture_output=True, check=True)
+            result = subprocess.run(['cloudflared', '--version'], capture_output=True, check=True)
             print("✅ cloudflared is already installed")
         except (subprocess.CalledProcessError, FileNotFoundError):
             print("📦 Installing cloudflared...")
-            # Install cloudflared
-            subprocess.run([
-                'wget', '-q',
-                'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb'
-            ], check=True)
-            subprocess.run(['dpkg', '-i', 'cloudflared-linux-amd64.deb'], check=True)
-            print("✅ cloudflared installed successfully")
+            try:
+                # For Ubuntu/Debian systems
+                if os.path.exists('/usr/bin/apt-get'):
+                    subprocess.run(['apt-get', 'update'], check=False, capture_output=True)
+                    subprocess.run([
+                        'wget', '-q',
+                        'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb'
+                    ], check=True)
+                    subprocess.run(['dpkg', '-i', 'cloudflared-linux-amd64.deb'], check=True)
+                else:
+                    # Alternative installation method
+                    subprocess.run([
+                        'wget', '-O', '/tmp/cloudflared',
+                        'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64'
+                    ], check=True)
+                    subprocess.run(['chmod', '+x', '/tmp/cloudflared'], check=True)
+                    subprocess.run(['mv', '/tmp/cloudflared', '/usr/local/bin/cloudflared'], check=True)
+                print("✅ cloudflared installed successfully")
+            except Exception as install_error:
+                print(f"❌ Failed to install cloudflared: {install_error}")
+                return False
+
+        # Global variable to store the tunnel URL
+        tunnel_url = [None]
 
         # Start tunnel in background
         def start_tunnel():
             try:
+                print(f"🚀 Starting Cloudflare tunnel for port {port}...")
                 process = subprocess.Popen([
-                    'cloudflared', 'tunnel', '--url', 'http://localhost:7860'
-                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                    'cloudflared', 'tunnel', '--url', f'http://localhost:{port}'
+                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, universal_newlines=True)
 
-                # Wait for tunnel URL
-                for line in process.stdout:
-                    if 'trycloudflare.com' in line or 'cloudflare.com' in line:
-                        url = line.strip().split()[-1]
-                        if url.startswith('http'):
-                            print(f"🔗 Public URL: {url}")
-                            print(f"🌍 Your IndexTTS interface is now accessible at: {url}")
-                            break
+                # Monitor both stdout and stderr for tunnel URL
+                import select
+                while True:
+                    ready, _, _ = select.select([process.stdout, process.stderr], [], [], 1.0)
+
+                    for stream in ready:
+                        line = stream.readline()
+                        if line:
+                            print(f"[Cloudflare] {line.strip()}")
+                            # Look for tunnel URL in various formats
+                            if any(domain in line for domain in ['trycloudflare.com', '.cloudflare.com', 'cfargotunnel.com']):
+                                # Extract URL from line
+                                words = line.strip().split()
+                                for word in words:
+                                    if word.startswith('http') and any(domain in word for domain in ['trycloudflare.com', '.cloudflare.com', 'cfargotunnel.com']):
+                                        tunnel_url[0] = word
+                                        print(f"\n🎉 SUCCESS! Cloudflare tunnel is ready!")
+                                        print(f"🔗 Public URL: {word}")
+                                        print(f"🌍 Your IndexTTS interface is accessible at: {word}")
+                                        print(f"📱 Share this URL with anyone!\n")
+                                        return
+
+                    # Check if process is still running
+                    if process.poll() is not None:
+                        break
 
             except Exception as e:
-                print(f"⚠️  Cloudflare tunnel setup failed: {e}")
+                print(f"⚠️  Cloudflare tunnel error: {e}")
                 print("💡 Falling back to local access only")
 
         # Start tunnel in background thread
         tunnel_thread = threading.Thread(target=start_tunnel, daemon=True)
         tunnel_thread.start()
 
-        # Give tunnel time to start
-        time.sleep(3)
-        return True
+        # Give tunnel more time to start and print URL
+        print("⏳ Waiting for Cloudflare tunnel to establish...")
+        time.sleep(8)
+
+        if tunnel_url[0]:
+            print(f"✅ Tunnel established: {tunnel_url[0]}")
+            return True
+        else:
+            print("⏳ Tunnel is starting... URL will appear above when ready")
+            return True
 
     except Exception as e:
         print(f"⚠️  Cloudflare tunnel setup failed: {e}")
@@ -312,16 +355,26 @@ def setup_cloudflare_tunnel():
         return False
 
 if __name__ == "__main__":
-    # Setup Cloudflare tunnel for public access (except in Colab which has built-in sharing)
+    print(f"🚀 Starting IndexTTS...")
+    print(f"🌐 Language: {language}")
+    print(f"📍 Environment: {'Colab' if IN_COLAB else 'Kaggle' if IN_KAGGLE else 'Local'}")
+
+    # Setup Cloudflare tunnel for public access
     use_cloudflare = False
-    if not IN_COLAB and cmd_args.host != "127.0.0.1":
-        use_cloudflare = setup_cloudflare_tunnel()
+
+    # Always try to setup Cloudflare tunnel for public access (except when host is localhost)
+    if cmd_args.host not in ["127.0.0.1", "localhost"]:
+        print("\n🌐 Setting up public URL access...")
+        use_cloudflare = setup_cloudflare_tunnel(cmd_args.port)
 
     # Configure launch parameters based on environment
     if IN_COLAB:
-        # Colab configuration - use built-in sharing
-        print("🚀 Starting IndexTTS on Google Colab...")
-        print("🔗 Public URL will be provided by Colab's built-in sharing")
+        # Colab configuration - use built-in sharing + Cloudflare as backup
+        print("\n🚀 Launching on Google Colab...")
+        print("🔗 Colab will provide a gradio.live URL")
+        if use_cloudflare:
+            print("🌐 Cloudflare tunnel also available (see above)")
+
         demo.queue(20)
         demo.launch(
             server_name="0.0.0.0",
@@ -332,11 +385,13 @@ if __name__ == "__main__":
         )
     elif IN_KAGGLE:
         # Kaggle configuration with Cloudflare tunnel
-        print("🚀 Starting IndexTTS on Kaggle...")
+        print("\n🚀 Launching on Kaggle...")
         if use_cloudflare:
-            print("🌐 Public URL will be provided by Cloudflare tunnel (see above)")
+            print("🌐 Public access via Cloudflare tunnel (see above)")
         else:
             print("🔗 Interface will be available in Kaggle's output panel")
+            print("⚠️  For public access, try running with --host 0.0.0.0")
+
         demo.queue(20)
         demo.launch(
             server_name="0.0.0.0",
@@ -347,12 +402,11 @@ if __name__ == "__main__":
         )
     else:
         # Local development configuration
-        print(f"🚀 Starting IndexTTS locally...")
+        print(f"\n🚀 Launching locally...")
         if use_cloudflare:
-            print("🌐 Public URL provided by Cloudflare tunnel (see above)")
-            print(f"🏠 Local access: http://{cmd_args.host}:{cmd_args.port}")
-        else:
-            print(f"🏠 Local access: http://{cmd_args.host}:{cmd_args.port}")
+            print("🌐 Public access via Cloudflare tunnel (see above)")
+        print(f"🏠 Local access: http://{cmd_args.host}:{cmd_args.port}")
+
         demo.queue(20)
         demo.launch(
             server_name=cmd_args.host,
