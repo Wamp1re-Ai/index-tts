@@ -12,7 +12,11 @@
 ## 👉🏻 IndexTTS 👈🏻
 
 [[HuggingFace Demo]](https://huggingface.co/spaces/IndexTeam/IndexTTS)   [[ModelScope Demo]](https://modelscope.cn/studios/IndexTeam/IndexTTS-Demo) \
-[[Paper]](https://arxiv.org/abs/2502.05512)  [[Demos]](https://index-tts.github.io)  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/index-tts/index-tts/blob/feat/english-colab-notebook/IndexTTS_Colab_EN.ipynb)
+[[Paper]](https://arxiv.org/abs/2502.05512)  [[Demos]](https://index-tts.github.io)
+
+**🚀 Quick Start:**
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Wamp1re-Ai/index-tts/blob/feat/english-colab-notebook/IndexTTS_Colab_EN.ipynb)
+[![Open In Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/Wamp1re-Ai/index-tts/blob/feat/english-colab-notebook/IndexTTS_Kaggle_EN.ipynb)
 
 **IndexTTS** is a GPT-style text-to-speech (TTS) model mainly based on XTTS and Tortoise. It is capable of correcting the pronunciation of Chinese characters using pinyin and controlling pauses at any position through punctuation marks. We enhanced multiple modules of the system, including the improvement of speaker condition feature representation, and the integration of BigVGAN2 to optimize audio quality. Trained on tens of thousands of hours of data, our system achieves state-of-the-art performance, outperforming current popular TTS systems such as XTTS, CosyVoice2, Fish-Speech, and F5-TTS.
 <span style="font-size:16px;">  
@@ -26,6 +30,27 @@ Welcome everyone to communicate and discuss!
 
 - `2025/03/25` 🔥🔥 We release the model parameters and inference code.
 - `2025/02/12` 🔥 We submitted our paper on arXiv, and released our demos and test sets.
+
+## 🌍 Platform Support
+
+**IndexTTS** now supports multiple platforms with English UI:
+
+### 🔥 Cloud Platforms (One-Click Setup)
+- **Google Colab**: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Wamp1re-Ai/index-tts/blob/feat/english-colab-notebook/IndexTTS_Colab_EN.ipynb)
+- **Kaggle**: [![Open In Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/Wamp1re-Ai/index-tts/blob/feat/english-colab-notebook/IndexTTS_Kaggle_EN.ipynb)
+
+### 🌐 Language Support
+- **English UI**: Full internationalization support with English interface
+- **Automatic Detection**: Environment-aware setup for optimal performance
+- **Cross-Platform**: Works seamlessly on Colab, Kaggle, and local environments
+
+### ✨ Features
+- ✅ **One-click deployment** on cloud platforms
+- ✅ **English interface** with complete translations
+- ✅ **Automatic environment detection** and optimization
+- ✅ **Fast dependency installation** with UV package manager
+- ✅ **Pre-configured model downloads** from Hugging Face
+- ✅ **Platform-specific optimizations** for Colab and Kaggle
 
 ## 🖥️ Method
 

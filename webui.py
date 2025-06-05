@@ -76,5 +76,34 @@ with gr.Blocks() as demo:
 
 
 if __name__ == "__main__":
-    demo.queue(20)
-    demo.launch(server_name="127.0.0.1")
+    import sys
+
+    # Detect environment
+    IN_COLAB = 'google.colab' in sys.modules
+    IN_KAGGLE = 'kaggle_secrets' in sys.modules or os.path.exists('/kaggle')
+
+    # Configure launch parameters based on environment
+    if IN_COLAB:
+        # Colab configuration
+        demo.queue(20)
+        demo.launch(
+            server_name="0.0.0.0",
+            server_port=7860,
+            share=True,  # Create public URL for Colab
+            debug=False,
+            quiet=False
+        )
+    elif IN_KAGGLE:
+        # Kaggle configuration
+        demo.queue(20)
+        demo.launch(
+            server_name="0.0.0.0",
+            server_port=7860,
+            share=False,  # Kaggle handles sharing differently
+            debug=False,
+            quiet=False
+        )
+    else:
+        # Local development configuration
+        demo.queue(20)
+        demo.launch(server_name="127.0.0.1")
