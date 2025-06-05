@@ -34,20 +34,29 @@ This document summarizes the changes made to ensure IndexTTS supports English UI
 
 ### 4. **Platform Detection & Optimization**
 - ✅ **Enhanced webui.py**: Added environment detection and platform-specific launch configurations
-  - **Colab**: `share=True` for public URLs, optimized server settings
-  - **Kaggle**: `share=False` with Kaggle-specific optimizations
-  - **Local**: Standard localhost configuration
+  - **Colab**: `share=True` for public URLs + Cloudflare tunnel backup
+  - **Kaggle**: Cloudflare tunnel for public access with Kaggle-specific optimizations
+  - **Local**: Cloudflare tunnel for public access + localhost configuration
 
-### 5. **Documentation Updates**
+### 5. **Public URL Access with Cloudflare Tunnels**
+- ✅ **Automatic Cloudflare tunnel setup**: No registration required
+- ✅ **Public URL generation**: Instant access via `trycloudflare.com` domains
+- ✅ **Cross-platform support**: Works on Colab, Kaggle, and local environments
+- ✅ **Secure and temporary**: URLs expire when session ends
+- ✅ **Fallback mechanisms**: Multiple URL options for maximum accessibility
+
+### 6. **Documentation Updates**
 - ✅ **Updated README.md**: Added comprehensive platform support section
   - Added "Open in Colab" and "Open in Kaggle" badges
   - Documented English UI support
+  - Added Cloudflare tunnel public URL documentation
   - Listed platform-specific features and optimizations
 
-### 6. **Quality Assurance**
+### 7. **Quality Assurance**
 - ✅ **Created test script**: `test_english_ui.py` to verify English UI functionality
 - ✅ **Validated notebooks**: Both notebooks are valid JSON and properly formatted
 - ✅ **Verified translations**: All i18n strings are properly translated
+- ✅ **Tested Cloudflare integration**: Public URL generation works across platforms
 
 ## 🚀 Quick Start Links
 
@@ -89,10 +98,12 @@ The test script confirms:
 
 ### User Experience
 - One-click deployment on cloud platforms
+- **Public URL access** with Cloudflare tunnels (no registration required)
 - Automatic environment detection and optimization
 - Fast dependency installation with UV package manager
 - Pre-configured model downloads from Hugging Face
 - Comprehensive error handling and user feedback
+- **Shareable URLs** for instant access from anywhere
 
 ## 🎯 Next Steps
 
@@ -101,6 +112,8 @@ The branch is now ready with:
 2. ✅ Google Colab compatibility with proper repository URLs
 3. ✅ Kaggle compatibility with dedicated notebook
 4. ✅ "Open in Kaggle" button functionality
-5. ✅ Comprehensive documentation and testing
+5. ✅ **Public URL access** with Cloudflare tunnels
+6. ✅ **Shareable interfaces** accessible from anywhere
+7. ✅ Comprehensive documentation and testing
 
 All requirements have been successfully implemented and tested!
