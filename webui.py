@@ -255,47 +255,97 @@ with gr.Blocks(title="IndexTTS Demo") as demo:
                      outputs=[output_audio])
 
 
-def setup_cloudflare_tunnel():
-    """Setup Cloudflare tunnel for public URL access"""
+def setup_ngrok_tunnel(port=7860):
+    """Setup ngrok tunnel for public URL access (no signup required)"""
     try:
         import subprocess
         import threading
         import time
+        import os
+        import json
 
-        print("🌐 Setting up Cloudflare tunnel for public access...")
+        print("🌐 Setting up ngrok tunnel for public access...")
 
-        # Install cloudflared if not available
+        # Install ngrok if not available
         try:
-            subprocess.run(['cloudflared', '--version'], capture_output=True, check=True)
-            print("✅ cloudflared is already installed")
+            result = subprocess.run(['ngrok', 'version'], capture_output=True, check=True)
+            print("✅ ngrok is already installed")
         except (subprocess.CalledProcessError, FileNotFoundError):
-            print("📦 Installing cloudflared...")
-            # Install cloudflared
-            subprocess.run([
-                'wget', '-q',
-                'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb'
-            ], check=True)
-            subprocess.run(['dpkg', '-i', 'cloudflared-linux-amd64.deb'], check=True)
-            print("✅ cloudflared installed successfully")
+            print("📦 Installing ngrok...")
+            try:
+                # Download and install ngrok
+                subprocess.run([
+                    'wget', '-q',
+                    'https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz'
+                ], check=True)
+                subprocess.run(['tar', 'xzf', 'ngrok-v3-stable-linux-amd64.tgz'], check=True)
+                subprocess.run(['mv', 'ngrok', '/usr/local/bin/ngrok'], check=True)
+                subprocess.run(['chmod', '+x', '/usr/local/bin/ngrok'], check=True)
+                print("✅ ngrok installed successfully")
+            except Exception as install_error:
+                print(f"❌ Failed to install ngrok: {install_error}")
+                return False
+
+        # Global variable to store the tunnel URL
+        tunnel_url = [None]
 
         # Start tunnel in background
         def start_tunnel():
             try:
-                process = subprocess.Popen([
-                    'cloudflared', 'tunnel', '--url', 'http://localhost:7860'
-                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                print(f"🚀 Starting ngrok tunnel for port {port}...")
+                print("⏳ This may take 10-30 seconds...")
 
-                # Wait for tunnel URL
-                for line in process.stdout:
-                    if 'trycloudflare.com' in line or 'cloudflare.com' in line:
-                        url = line.strip().split()[-1]
-                        if url.startswith('http'):
-                            print(f"🔗 Public URL: {url}")
-                            print(f"🌍 Your IndexTTS interface is now accessible at: {url}")
-                            break
+                # Start ngrok tunnel
+                process = subprocess.Popen([
+                    'ngrok', 'http', str(port), '--log=stdout'
+                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
+
+                # Monitor output for tunnel URL
+                start_time = time.time()
+                timeout = 45  # 45 seconds timeout
+
+                while time.time() - start_time < timeout:
+                    line = process.stdout.readline()
+                    if line:
+                        line = line.strip()
+                        print(f"[ngrok] {line}")
+
+                        # Look for tunnel URL in ngrok output
+                        if 'url=' in line and 'ngrok' in line:
+                            # Extract URL from ngrok log line
+                            parts = line.split('url=')
+                            if len(parts) > 1:
+                                url = parts[1].split()[0]
+                                if url.startswith('http') and 'ngrok' in url:
+                                    tunnel_url[0] = url
+                                    print(f"\n🎉 SUCCESS! ngrok tunnel is ready!")
+                                    print(f"🔗 Public URL: {url}")
+                                    print(f"🌍 Your IndexTTS interface is accessible at: {url}")
+                                    print(f"📱 Share this URL with anyone!\n")
+                                    return
+
+                        # Alternative: look for forwarding info
+                        if 'Forwarding' in line and 'ngrok' in line:
+                            parts = line.split()
+                            for part in parts:
+                                if part.startswith('http') and 'ngrok' in part:
+                                    tunnel_url[0] = part
+                                    print(f"\n🎉 SUCCESS! ngrok tunnel is ready!")
+                                    print(f"🔗 Public URL: {part}")
+                                    print(f"🌍 Your IndexTTS interface is accessible at: {part}")
+                                    print(f"📱 Share this URL with anyone!\n")
+                                    return
+
+                    # Check if process is still running
+                    if process.poll() is not None:
+                        break
+
+                    time.sleep(0.5)
+
+                print("⏰ Timeout waiting for ngrok tunnel URL")
 
             except Exception as e:
-                print(f"⚠️  Cloudflare tunnel setup failed: {e}")
+                print(f"⚠️  ngrok tunnel error: {e}")
                 print("💡 Falling back to local access only")
 
         # Start tunnel in background thread
@@ -303,25 +353,117 @@ def setup_cloudflare_tunnel():
         tunnel_thread.start()
 
         # Give tunnel time to start
-        time.sleep(3)
+        print("⏳ Waiting for ngrok tunnel to establish...")
+        time.sleep(10)
+
+        if tunnel_url[0]:
+            print(f"✅ Tunnel established: {tunnel_url[0]}")
+            return True
+        else:
+            print("⏳ Tunnel is starting... URL will appear above when ready")
+            return True
+
+    except Exception as e:
+        print(f"⚠️  ngrok tunnel setup failed: {e}")
+        print("💡 Continuing with local access only")
+        return False
+
+def setup_cloudflare_tunnel(port=7860):
+    """Setup Cloudflare tunnel as fallback option"""
+    try:
+        import subprocess
+        import threading
+        import time
+        import os
+
+        print("🌐 Setting up Cloudflare tunnel as fallback...")
+
+        # Install cloudflared if not available
+        try:
+            result = subprocess.run(['cloudflared', '--version'], capture_output=True, check=True)
+            print("✅ cloudflared is already installed")
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            print("📦 Installing cloudflared...")
+            try:
+                subprocess.run([
+                    'wget', '-q',
+                    'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb'
+                ], check=True)
+                subprocess.run(['dpkg', '-i', 'cloudflared-linux-amd64.deb'], check=True)
+                print("✅ cloudflared installed successfully")
+            except Exception as install_error:
+                print(f"❌ Failed to install cloudflared: {install_error}")
+                return False
+
+        # Start tunnel in background (simplified version)
+        def start_tunnel():
+            try:
+                print(f"🚀 Starting Cloudflare tunnel for port {port}...")
+                process = subprocess.Popen([
+                    'cloudflared', 'tunnel', '--url', f'http://localhost:{port}'
+                ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+
+                for line in iter(process.stdout.readline, ''):
+                    line = line.strip()
+                    if line:
+                        print(f"[Cloudflare] {line}")
+                        if 'trycloudflare.com' in line:
+                            words = line.split()
+                            for word in words:
+                                if word.startswith('http') and 'trycloudflare.com' in word:
+                                    print(f"\n🎉 Cloudflare tunnel ready!")
+                                    print(f"🔗 Fallback URL: {word}")
+                                    return
+
+            except Exception as e:
+                print(f"⚠️  Cloudflare tunnel error: {e}")
+
+        tunnel_thread = threading.Thread(target=start_tunnel, daemon=True)
+        tunnel_thread.start()
         return True
 
     except Exception as e:
         print(f"⚠️  Cloudflare tunnel setup failed: {e}")
-        print("💡 Continuing with local access only")
         return False
 
+def setup_public_tunnel(port=7860):
+    """Setup public tunnel with ngrok as primary and Cloudflare as fallback"""
+    print("🌐 Setting up public URL access...")
+    print("🎯 Trying ngrok first (more reliable), Cloudflare as fallback")
+
+    # Try ngrok first
+    if setup_ngrok_tunnel(port):
+        print("✅ ngrok tunnel setup initiated")
+        # Also try Cloudflare as additional option
+        print("\n🔄 Also setting up Cloudflare tunnel as backup...")
+        setup_cloudflare_tunnel(port)
+        return True
+    else:
+        print("❌ ngrok setup failed, trying Cloudflare...")
+        return setup_cloudflare_tunnel(port)
+
 if __name__ == "__main__":
-    # Setup Cloudflare tunnel for public access (except in Colab which has built-in sharing)
-    use_cloudflare = False
-    if not IN_COLAB and cmd_args.host != "127.0.0.1":
-        use_cloudflare = setup_cloudflare_tunnel()
+    print(f"🚀 Starting IndexTTS...")
+    print(f"🌐 Language: {language}")
+    print(f"📍 Environment: {'Colab' if IN_COLAB else 'Kaggle' if IN_KAGGLE else 'Local'}")
+
+    # Setup public tunnel for access
+    use_tunnel = False
+
+    # Always try to setup public tunnel for access (except when host is localhost)
+    if cmd_args.host not in ["127.0.0.1", "localhost"]:
+        print("\n🌐 Setting up public URL access...")
+        print("🎯 Using ngrok (primary) + Cloudflare (fallback) for reliable access")
+        use_tunnel = setup_public_tunnel(cmd_args.port)
 
     # Configure launch parameters based on environment
     if IN_COLAB:
-        # Colab configuration - use built-in sharing
-        print("🚀 Starting IndexTTS on Google Colab...")
-        print("🔗 Public URL will be provided by Colab's built-in sharing")
+        # Colab configuration - use built-in sharing + tunnels as backup
+        print("\n🚀 Launching on Google Colab...")
+        print("🔗 Colab will provide a gradio.live URL")
+        if use_tunnel:
+            print("🌐 Additional tunnel URLs available (see above)")
+
         demo.queue(20)
         demo.launch(
             server_name="0.0.0.0",
@@ -331,33 +473,34 @@ if __name__ == "__main__":
             quiet=False
         )
     elif IN_KAGGLE:
-        # Kaggle configuration with Cloudflare tunnel
-        print("🚀 Starting IndexTTS on Kaggle...")
-        if use_cloudflare:
-            print("🌐 Public URL will be provided by Cloudflare tunnel (see above)")
+        # Kaggle configuration with tunnel access
+        print("\n🚀 Launching on Kaggle...")
+        if use_tunnel:
+            print("🌐 Public access via tunnel URLs (see above)")
         else:
             print("🔗 Interface will be available in Kaggle's output panel")
+            print("⚠️  For public access, try running with --host 0.0.0.0")
+
         demo.queue(20)
         demo.launch(
             server_name="0.0.0.0",
             server_port=cmd_args.port,
-            share=False,  # Use Cloudflare tunnel instead
+            share=False,  # Use tunnels instead
             debug=False,
             quiet=False
         )
     else:
         # Local development configuration
-        print(f"🚀 Starting IndexTTS locally...")
-        if use_cloudflare:
-            print("🌐 Public URL provided by Cloudflare tunnel (see above)")
-            print(f"🏠 Local access: http://{cmd_args.host}:{cmd_args.port}")
-        else:
-            print(f"🏠 Local access: http://{cmd_args.host}:{cmd_args.port}")
+        print(f"\n🚀 Launching locally...")
+        if use_tunnel:
+            print("🌐 Public access via tunnel URLs (see above)")
+        print(f"🏠 Local access: http://{cmd_args.host}:{cmd_args.port}")
+
         demo.queue(20)
         demo.launch(
             server_name=cmd_args.host,
             server_port=cmd_args.port,
-            share=False,  # Use Cloudflare tunnel for public access if enabled
+            share=False,  # Use tunnels for public access if enabled
             debug=False,
             quiet=False
         )

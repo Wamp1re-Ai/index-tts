@@ -47,16 +47,17 @@ Welcome everyone to communicate and discuss! / 欢迎大家来交流讨论！
 - **Cross-Platform**: Works seamlessly on Colab, Kaggle, and local environments
 
 ### 🔗 Public URL Access
-- **Cloudflare Tunnels**: Automatic public URL generation using Cloudflare's free tunnel service
-- **No Registration**: No account required - instant public access
+- **ngrok Tunnels (Primary)**: More reliable public URL generation using ngrok (no signup required)
+- **Cloudflare Tunnels (Fallback)**: Backup option using Cloudflare's free tunnel service
+- **No Registration**: No account required for either service - instant public access
 - **Share Anywhere**: Generated URLs can be shared with anyone for immediate access
 - **Secure & Temporary**: URLs expire when session ends - safe for experimentation
-- **Multiple Options**: Colab uses built-in sharing + Cloudflare backup, Kaggle uses Cloudflare primary
+- **Multiple Options**: Colab uses built-in sharing + ngrok + Cloudflare, Kaggle uses ngrok primary
 
 ### ✨ Features
 - ✅ **One-click deployment** on cloud platforms
 - ✅ **English interface** with complete translations
-- ✅ **Public URL access** with Cloudflare tunnels
+- ✅ **Reliable public URL access** with ngrok (primary) + Cloudflare (fallback)
 - ✅ **Automatic environment detection** and optimization
 - ✅ **Fast dependency installation** with UV package manager
 - ✅ **Pre-configured model downloads** from Hugging Face
