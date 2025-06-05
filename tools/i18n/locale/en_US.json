@@ -6,5 +6,19 @@
     "请上传参考音频": "Please upload a reference audio",
     "请输入目标文本": "Please enter the target text",
     "选择推理模式（批次推理：更适合长句，性能翻倍）": "Select inference mode (Batch inference: more suitable for long sentences, doubles performance)",
-    "音频生成": "Audio Generation"
+    "音频生成": "Audio Generation",
+    "当前模型版本{}": "Current model version: {}",
+    "高级生成参数设置": "Advanced Generation Parameters",
+    "**GPT2 采样设置** _参数会影响音频多样性和生成速度详见[Generation strategies](https://huggingface.co/docs/transformers/main/en/generation_strategies)_": "**GPT2 Sampling Settings** _Parameters affect audio diversity and generation speed. See [Generation strategies](https://huggingface.co/docs/transformers/main/en/generation_strategies)_",
+    "是否进行采样": "Whether to perform sampling",
+    "生成Token最大数量，过小导致音频被截断": "Maximum number of generated tokens, too small will cause audio truncation",
+    "**分句设置** _参数会影响音频质量和生成速度_": "**Sentence Segmentation Settings** _Parameters affect audio quality and generation speed_",
+    "分句最大Token数": "Maximum tokens per sentence",
+    "建议80~200之间，值越大，分句越长；值越小，分句越碎；过小过大都可能导致音频质量不高": "Recommended 80~200, larger values create longer sentences; smaller values create shorter segments; too small or too large may reduce audio quality",
+    "分句分桶的最大容量（批次推理生效）": "Maximum capacity for sentence batching (effective in batch inference)",
+    "建议2-8之间，值越大，一批次推理包含的分句数越多，过大可能导致内存溢出": "Recommended 2-8, larger values include more sentences per batch, too large may cause memory overflow",
+    "预览分句结果": "Preview Sentence Segmentation",
+    "序号": "Index",
+    "分句内容": "Sentence Content",
+    "Token数": "Token Count"
 }
