@@ -12,21 +12,55 @@
 ## 👉🏻 IndexTTS 👈🏻
 
 [[HuggingFace Demo]](https://huggingface.co/spaces/IndexTeam/IndexTTS)   [[ModelScope Demo]](https://modelscope.cn/studios/IndexTeam/IndexTTS-Demo) \
-[[Paper]](https://arxiv.org/abs/2502.05512)  [[Demos]](https://index-tts.github.io)  
+[[Paper]](https://arxiv.org/abs/2502.05512)  [[Demos]](https://index-tts.github.io)
+
+**🚀 Quick Start:**
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Wamp1re-Ai/index-tts/blob/feat/english-colab-notebook/IndexTTS_Colab_EN.ipynb)
+[![Open In Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/Wamp1re-Ai/index-tts/blob/feat/english-colab-notebook/IndexTTS_Kaggle_EN.ipynb)
 
 **IndexTTS** is a GPT-style text-to-speech (TTS) model mainly based on XTTS and Tortoise. It is capable of correcting the pronunciation of Chinese characters using pinyin and controlling pauses at any position through punctuation marks. We enhanced multiple modules of the system, including the improvement of speaker condition feature representation, and the integration of BigVGAN2 to optimize audio quality. Trained on tens of thousands of hours of data, our system achieves state-of-the-art performance, outperforming current popular TTS systems such as XTTS, CosyVoice2, Fish-Speech, and F5-TTS.
 <span style="font-size:16px;">  
 Experience **IndexTTS**: Please contact <u>xuanwu@bilibili.com</u> for more detailed information. </span>
 ### Contact
+QQ Group (English): 553460296 \
 QQ群（二群）：1048202584 \
-Discord：https://discord.gg/uT32E7KDmy  \
-简历：indexspeech@bilibili.com  \
-欢迎大家来交流讨论！
+Discord: https://discord.gg/uT32E7KDmy  \
+Resume Submissions / 简历：indexspeech@bilibili.com  \
+Welcome everyone to communicate and discuss! / 欢迎大家来交流讨论！
 ## 📣 Updates
 
 - `2025/05/14` 🔥🔥 We release the **IndexTTS-1.5**, Significantly improve the model's stability and its performance in the English language.
 - `2025/03/25` 🔥 We release IndexTTS-1.0 model parameters and inference code.
 - `2025/02/12` 🔥 We submitted our paper on arXiv, and released our demos and test sets.
+
+## 🌍 Platform Support
+
+**IndexTTS** now supports multiple platforms with English UI:
+
+### 🔥 Cloud Platforms (One-Click Setup)
+- **Google Colab**: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Wamp1re-Ai/index-tts/blob/feat/english-colab-notebook/IndexTTS_Colab_EN.ipynb)
+- **Kaggle**: [![Open In Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/Wamp1re-Ai/index-tts/blob/feat/english-colab-notebook/IndexTTS_Kaggle_EN.ipynb)
+
+### 🌐 Language Support
+- **English UI**: Full internationalization support with English interface
+- **Automatic Detection**: Environment-aware setup for optimal performance
+- **Cross-Platform**: Works seamlessly on Colab, Kaggle, and local environments
+
+### 🔗 Public URL Access
+- **Cloudflare Tunnels**: Automatic public URL generation using Cloudflare's free tunnel service
+- **No Registration**: No account required - instant public access
+- **Share Anywhere**: Generated URLs can be shared with anyone for immediate access
+- **Secure & Temporary**: URLs expire when session ends - safe for experimentation
+- **Multiple Options**: Colab uses built-in sharing + Cloudflare backup, Kaggle uses Cloudflare primary
+
+### ✨ Features
+- ✅ **One-click deployment** on cloud platforms
+- ✅ **English interface** with complete translations
+- ✅ **Public URL access** with Cloudflare tunnels
+- ✅ **Automatic environment detection** and optimization
+- ✅ **Fast dependency installation** with UV package manager
+- ✅ **Pre-configured model downloads** from Hugging Face
+- ✅ **Platform-specific optimizations** for Colab and Kaggle
 
 ## 🖥️ Method
 
@@ -135,7 +169,7 @@ huggingface-cli download IndexTeam/IndexTTS-1.5 \
   --local-dir checkpoints
 ```
 
-Recommended for China users. 如果下载速度慢，可以使用镜像：
+Recommended for users in China. If the download speed is slow, you can use a mirror:
 ```bash
 export HF_ENDPOINT="https://hf-mirror.com"
 ```
