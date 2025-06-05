@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Cloudflare Tunnel Setup Script for IndexTTS
-This script sets up a Cloudflare tunnel to provide public URL access
+Public Tunnel Setup Script for IndexTTS
+This script sets up ngrok (primary) and Cloudflare (fallback) tunnels to provide public URL access
 """
 
 import subprocess
@@ -11,32 +11,45 @@ import os
 import sys
 import signal
 
+def install_ngrok():
+    """Install ngrok if not available"""
+    try:
+        # Check if already installed
+        result = subprocess.run(['ngrok', 'version'], capture_output=True, check=True)
+        print("✅ ngrok is already installed")
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("📦 Installing ngrok...")
+        try:
+            # Download and install ngrok
+            subprocess.run([
+                'wget', '-q',
+                'https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz'
+            ], check=True)
+            subprocess.run(['tar', 'xzf', 'ngrok-v3-stable-linux-amd64.tgz'], check=True)
+            subprocess.run(['mv', 'ngrok', '/usr/local/bin/ngrok'], check=True)
+            subprocess.run(['chmod', '+x', '/usr/local/bin/ngrok'], check=True)
+            print("✅ ngrok installed successfully")
+            return True
+        except Exception as e:
+            print(f"❌ Failed to install ngrok: {e}")
+            return False
+
 def install_cloudflared():
-    """Install cloudflared if not available"""
+    """Install cloudflared if not available (fallback option)"""
     try:
         # Check if already installed
         result = subprocess.run(['cloudflared', '--version'], capture_output=True, check=True)
         print("✅ cloudflared is already installed")
         return True
     except (subprocess.CalledProcessError, FileNotFoundError):
-        print("📦 Installing cloudflared...")
+        print("📦 Installing cloudflared as backup...")
         try:
-            # For Ubuntu/Debian systems (Colab/Kaggle)
-            if os.path.exists('/usr/bin/apt-get'):
-                subprocess.run(['apt-get', 'update'], check=False, capture_output=True)
-                subprocess.run([
-                    'wget', '-q', 
-                    'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb'
-                ], check=True)
-                subprocess.run(['dpkg', '-i', 'cloudflared-linux-amd64.deb'], check=True)
-            else:
-                # Alternative installation method
-                subprocess.run([
-                    'wget', '-O', '/tmp/cloudflared',
-                    'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64'
-                ], check=True)
-                subprocess.run(['chmod', '+x', '/tmp/cloudflared'], check=True)
-                subprocess.run(['mv', '/tmp/cloudflared', '/usr/local/bin/cloudflared'], check=True)
+            subprocess.run([
+                'wget', '-q',
+                'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb'
+            ], check=True)
+            subprocess.run(['dpkg', '-i', 'cloudflared-linux-amd64.deb'], check=True)
             print("✅ cloudflared installed successfully")
             return True
         except Exception as e:
